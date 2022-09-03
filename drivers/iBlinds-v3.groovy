@@ -77,7 +77,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Field static final Long supervisionCheckDelay = 5 // number of seconds
 
 metadata {
-   definition (name: "iBlinds v3 (Community Driver)", namespace: "RMoRobert", author: "Robert Morris", importUrl: "https://raw.githubusercontent.com/RMoRobert/Hubitat/master/drivers/iBlinds-v3.groovy") {
+   definition (name: "iBlinds v3 (Eric Test)", namespace: "RMoRobert", author: "Robert Morris", importUrl: "https://raw.githubusercontent.com/RMoRobert/Hubitat/master/drivers/iBlinds-v3.groovy") {
       capability "Actuator"
       capability "Configuration"
       capability "Refresh"
@@ -103,7 +103,7 @@ metadata {
                  [17:"5 PM"],[22: "10 PM"],[23:"11 PM"],[1000: "Disabled"],[2000: "Random"]]
       input name: "enableDebug", type: "bool", title: "Enable debug logging", defaultValue: true
       input name: "enableDesc", type: "bool", title: "Enable descriptionText logging", defaultValue: true
-      input name: "dimSpeed", type: "number", description: "", title: "Set dimming speed   ... (default = 0);" , defaultValue: 0, range: 1..99
+      input name: "dimSpeed", type: "number", description: "", title: "Set dimming speed   ... (default = 0);" , defaultValue: 0, range: 0..99
    }
 }
 
@@ -399,20 +399,31 @@ List<String> setPosition(Number value) {
 }
 
 List<String> startPositionChange(String direction) {
+   Integer distance
+   Integer dimDuration
+   Integer  denom
    if (enableDebug) log.debug "startPositionChange($direction)"
    Boolean openClose = (direction != "open")
    if (openClose) {
-      distance = 99 - currentpositon 
+      distance = 99 - device.currentValue("level").toInteger() 
+      
    }
    else {
-      distance = currentpositon
+      distance = device.currentValue("level").toInteger() 
    }
-   Integer dimDuration
+    
+   log.debug  "current Level then distance then speed"
+   log.debug  device.currentValue("level").toInteger() 
+   log.debug  distance 
+   log.debug  dimSpeed 
    if (dimSpeed == 0){
       dimDuration = 0
    }
    else {
-      dimDuration = dimSpeed.intdiv(distanceDirection.intdiv(dimSpeed)) 
+       //I need to figure out the formula to keep the default blind speed near constant I'm not sure this is working
+       
+      //denom = distance/dimSpeed 
+      dimDuration = 20 //dimSpeed/denom 
    }
    hubitat.zwave.Command cmd = zwave.switchMultilevelV2.switchMultilevelStartLevelChange(dimmingDuration: dimDuration, upDown: openClose, ignoreStartLevel: 1, startLevel: 0)
    return [zwaveSecureEncap(cmd)]
