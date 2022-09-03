@@ -13,6 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  * 
  *  Version History
+ *  2022-09-02: Extend start/stopPositionChange - Eric B 
  *  2022-09-01: Add initiateCalibration() command, new min/max tilt parameters, add start/stopPositionChange(),
  *              remove inadvertent initialize()/configure() on hub restart
  *  2022-08-31: Change parameter 3 back to 1 per iBlinds' suggestion
@@ -102,6 +103,7 @@ metadata {
                  [17:"5 PM"],[22: "10 PM"],[23:"11 PM"],[1000: "Disabled"],[2000: "Random"]]
       input name: "enableDebug", type: "bool", title: "Enable debug logging", defaultValue: true
       input name: "enableDesc", type: "bool", title: "Enable descriptionText logging", defaultValue: true
+      input name: "dimSpeed", type: "number", description: "", title: "Set dimming speed   ... (default = 0);" , defaultValue: 0, range: 1..99
    }
 }
 
@@ -399,7 +401,20 @@ List<String> setPosition(Number value) {
 List<String> startPositionChange(String direction) {
    if (enableDebug) log.debug "startPositionChange($direction)"
    Boolean openClose = (direction != "open")
-   hubitat.zwave.Command cmd = zwave.switchMultilevelV1.switchMultilevelStartLevelChange(upDown: openClose, ignoreStartLevel: 1, startLevel: 0)
+   if (openClose) {
+      distance = 99 - currentpositon 
+   }
+   else {
+      distance = currentpositon
+   }
+   Integer dimDuration
+   if (dimSpeed == 0){
+      dimDuration = 0
+   }
+   else {
+      dimDuration = dimSpeed.intdiv(distanceDirection.intdiv(dimSpeed)) 
+   }
+   hubitat.zwave.Command cmd = zwave.switchMultilevelV2.switchMultilevelStartLevelChange(dimmingDuration: dimDuration, upDown: openClose, ignoreStartLevel: 1, startLevel: 0)
    return [zwaveSecureEncap(cmd)]
 }
 
