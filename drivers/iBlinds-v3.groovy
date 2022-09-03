@@ -412,7 +412,7 @@ List<String> startPositionChange(String direction) {
       distance = device.currentValue("level").toInteger() 
    }
     
-   log.debug  "current Level then distance then speed"
+   log.debug  "current Level = then distance then speed"
    log.debug  device.currentValue("level").toInteger() 
    log.debug  distance 
    log.debug  dimSpeed 
@@ -420,10 +420,10 @@ List<String> startPositionChange(String direction) {
       dimDuration = 0
    }
    else {
-       //I need to figure out the formula to keep the default blind speed near constant I'm not sure this is working
-       
-      //denom = distance/dimSpeed 
-      dimDuration = 20 //dimSpeed/denom 
+      
+       //This should work However, It is not working correctly for me 
+       // (distance * speed) / 100    
+      dimDuration = (distance * dimSpeed) / 100
    }
    hubitat.zwave.Command cmd = zwave.switchMultilevelV2.switchMultilevelStartLevelChange(dimmingDuration: dimDuration, upDown: openClose, ignoreStartLevel: 1, startLevel: 0)
    return [zwaveSecureEncap(cmd)]
